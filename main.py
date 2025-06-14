@@ -31,3 +31,12 @@ async def save_expense(request: Request):
         json.dump(expenses, f, ensure_ascii=False, indent=2)
 
     return {"status": "success", "data": new_data}
+
+@app.get("/list")
+async def get_expenses():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            expenses = json.load(f)
+    else:
+        expenses = []
+    return {"status": "success", "data": expenses}
