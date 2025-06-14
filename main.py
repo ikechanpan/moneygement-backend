@@ -35,6 +35,8 @@ async def save_to_supabase(request: Request):
         json=[data]
     )
 
+    print("Supabase response:", response.status_code, response.text)
+    
     return {"status": "supabase_saved", "response": response.json()}
 
 @app.get("/list")
