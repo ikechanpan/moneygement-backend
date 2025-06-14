@@ -1,10 +1,8 @@
+import uuid
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = FastAPI()
 
@@ -23,6 +21,8 @@ app.add_middleware(
 async def save_to_supabase(request: Request):
     data = await request.json()
 
+    data["id"] = str(uuid.uuid4())
+
     headers = {
         "apikey": SUPABASE_API_KEY,
         "Authorization": f"Bearer {SUPABASE_API_KEY}",
@@ -36,8 +36,11 @@ async def save_to_supabase(request: Request):
     )
 
     print("Supabase response:", response.status_code, response.text)
-    
-    return {"status": "supabase_saved", "response": response.json()}
+
+    try:
+        return {"status": "supabase_saved", "response": response.json()}
+    except Exception:
+        return {"status": "supabase_error", "response": response.text}
 
 @app.get("/list")
 def get_expenses():
