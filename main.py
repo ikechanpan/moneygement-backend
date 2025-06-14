@@ -1,42 +1,52 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import json
+import requests
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_API_KEY = os.environ.get("SUPABASE_API_KEY")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # フロントのドメインに限定してもOK
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-DATA_FILE = "expenses.json"
-
 @app.post("/save")
-async def save_expense(request: Request):
-    new_data = await request.json()
+async def save_to_supabase(request: Request):
+    data = await request.json()
 
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            expenses = json.load(f)
-    else:
-        expenses = []
+    headers = {
+        "apikey": SUPABASE_API_KEY,
+        "Authorization": f"Bearer {SUPABASE_API_KEY}",
+        "Content-Type": "application/json"
+    }
 
-    expenses.append(new_data)
+    response = requests.post(
+        f"{SUPABASE_URL}/rest/v1/expenses",
+        headers=headers,
+        json=[data]
+    )
 
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(expenses, f, ensure_ascii=False, indent=2)
-
-    return {"status": "success", "data": new_data}
+    return {"status": "supabase_saved", "response": response.json()}
 
 @app.get("/list")
-async def get_expenses():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            expenses = json.load(f)
-    else:
-        expenses = []
-    return {"status": "success", "data": expenses}
+def get_expenses():
+    headers = {
+        "apikey": SUPABASE_API_KEY,
+        "Authorization": f"Bearer {SUPABASE_API_KEY}"
+    }
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/expenses?select=*",
+        headers=headers
+    )
+
+    return {"status": "fetched", "data": response.json()}
