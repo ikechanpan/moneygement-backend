@@ -1,13 +1,15 @@
 import uuid
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
+import jwt
 
 app = FastAPI()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_API_KEY = os.environ.get("SUPABASE_API_KEY")
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")  # 必要に応じて設定
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,10 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/save")
-async def save_to_supabase(request: Request):
-    data = await request.json()
+def verify_jwt_token(token: str):
+    try:
+        payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
+@app.post("/save")
+async def save_to_supabase(request: Request, authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+
+    token = authorization.replace("Bearer ", "")
+    verify_jwt_token(token)
+
+    data = await request.json()
     data["id"] = str(uuid.uuid4())
 
     headers = {
@@ -43,7 +59,13 @@ async def save_to_supabase(request: Request):
         return {"status": "supabase_error", "response": response.text}
 
 @app.get("/list")
-def get_expenses():
+def get_expenses(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+
+    token = authorization.replace("Bearer ", "")
+    verify_jwt_token(token)
+
     headers = {
         "apikey": SUPABASE_API_KEY,
         "Authorization": f"Bearer {SUPABASE_API_KEY}"
