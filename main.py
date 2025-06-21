@@ -21,6 +21,7 @@ app.add_middleware(
 
 def verify_jwt_token(token: str):
     try:
+        print(SUPABASE_JWT_SECRET)
         payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
