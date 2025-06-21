@@ -9,7 +9,7 @@ app = FastAPI()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_API_KEY = os.environ.get("SUPABASE_API_KEY")
-SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")  # 必要に応じて設定
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,11 +40,9 @@ async def save_to_supabase(request: Request, authorization: str = Header(None)):
 
     data = await request.json()
     data["id"] = str(uuid.uuid4())
-    data["user_id"] = payload["sub"]  # 🔥 ここがポイント（auth.uid() と一致）
-
-    print("JWT payload:", payload)
-    print("→ user_id:", payload.get("sub"))
-
+    data["user_id"] = payload["sub"]
+    print("Data to insert:", data)
+    
     headers = {
         "apikey": SUPABASE_API_KEY,
         "Authorization": f"Bearer {SUPABASE_API_KEY}",
