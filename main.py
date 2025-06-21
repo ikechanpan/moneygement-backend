@@ -27,6 +27,10 @@ def verify_jwt_token(token: str):
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    except jwt.InvalidTokenError as e:
+        print("JWT decode failed:", str(e))
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 
 @app.post("/save")
 async def save_to_supabase(request: Request, authorization: str = Header(None)):
