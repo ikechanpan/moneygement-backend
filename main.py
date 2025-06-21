@@ -42,6 +42,9 @@ async def save_to_supabase(request: Request, authorization: str = Header(None)):
     data["id"] = str(uuid.uuid4())
     data["user_id"] = payload["sub"]  # 🔥 ここがポイント（auth.uid() と一致）
 
+    print("JWT payload:", payload)
+    print("→ user_id:", payload.get("sub"))
+
     headers = {
         "apikey": SUPABASE_API_KEY,
         "Authorization": f"Bearer {SUPABASE_API_KEY}",
