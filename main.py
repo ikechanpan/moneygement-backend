@@ -21,17 +21,17 @@ app.add_middleware(
 
 def verify_jwt_token(token: str):
     try:
-        print(SUPABASE_JWT_SECRET)
+        print("Verifying token...")
+        print("Using SUPABASE_JWT_SECRET:", repr(SUPABASE_JWT_SECRET)[:10], "...")  # 一部だけ表示
         payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        print("JWT payload decoded successfully:", payload)
         return payload
     except jwt.ExpiredSignatureError:
+        print("JWT decode failed: Token has expired")
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
     except jwt.InvalidTokenError as e:
         print("JWT decode failed:", str(e))
         raise HTTPException(status_code=401, detail="Invalid token")
-
 
 @app.post("/save") 
 async def save_to_supabase(request: Request, authorization: str = Header(None)):
