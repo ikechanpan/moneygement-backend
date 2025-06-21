@@ -13,6 +13,7 @@ SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")  # 必要に応じ�
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["https://ikechanpan.github.io"],
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
