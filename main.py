@@ -32,16 +32,16 @@ def verify_jwt_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@app.post("/save")
+@app.post("/save") 
 async def save_to_supabase(request: Request, authorization: str = Header(None)):
 
-    print("Authorization header:", authorization)
-    print("Extracted token:", token[:30])
-    
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header missing")
 
     token = authorization.replace("Bearer ", "")
+    print("Authorization header:", authorization)
+    print("Extracted token:", token[:30])
+
     verify_jwt_token(token)
 
     data = await request.json()
