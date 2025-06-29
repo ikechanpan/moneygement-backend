@@ -13,7 +13,7 @@ SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.moneygement\.pages\.dev\.*",
+    allow_origin_regex=r"https://moneygement\.pages\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
